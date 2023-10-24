@@ -17,6 +17,7 @@ from aiogram.types import (
     ReplyKeyboardRemove,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
+    CallbackQuery,
 )
 import re
 import hashlib
@@ -26,6 +27,36 @@ form_router = Router()
 
 class Form(StatesGroup):
     id = State()
+
+
+# TODO: проброс текста в поле ввода, ситуация со стэйтом отправки и получением сообщения
+
+
+@form_router.callback_query()
+async def callback_query_handler(
+    callback_query: CallbackQuery, state: FSMContext
+) -> Any:
+    if callback_query.data:
+        data_list = callback_query.data.split("_")
+        if len(data_list) == 2 and data_list[0] == "answer":
+            try:
+                await callback_query.bot.get_chat(data_list[1])
+                await state.set_state(Form.id)
+                await state.update_data(id=data_list[1])
+                await callback_query.message.answer(
+                    f"💬 Отправь своё анонимное послание",
+                    reply_markup=ReplyKeyboardMarkup(
+                        keyboard=[[KeyboardButton(text="⛔️ Отмена")]],
+                        resize_keyboard=True,
+                    ),
+                )
+                await callback_query.answer()
+            except exceptions.TelegramBadRequest:
+                await state.clear()
+                await callback_query.message.answer(
+                    "⛔️ Извини, пользователь не найден",
+                    reply_markup=ReplyKeyboardRemove(),
+                )
 
 
 @form_router.message(CommandStart())
@@ -46,11 +77,11 @@ async def command_start(
         )
     else:
         try:
-            chat = await message.bot.get_chat(command.args)
+            await message.bot.get_chat(command.args)
             await state.set_state(Form.id)
             await state.update_data(id=command.args)
             await message.answer(
-                f"💬 Отправь своё анонимное послание для {'@' + chat.username if chat.username else chat.full_name}",
+                f"💬 Отправь своё анонимное послание",
                 reply_markup=ReplyKeyboardMarkup(
                     keyboard=[[KeyboardButton(text="⛔️ Отмена")]], resize_keyboard=True
                 ),
@@ -82,20 +113,31 @@ async def process_id(message: Message, state: FSMContext) -> None:
     else:
         try:
             await message.bot.send_message(
-                id, f"📨 <b>Получено новое сообщение</b>\n\n{message.text}"
+                id,
+                f"📨 <b>Получено новое сообщение</b>\n\n{message.text}",
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [
+                            InlineKeyboardButton(
+                                text="🔄 Ответить",
+                                callback_data=f"answer_{message.from_user.id}",
+                            )
+                        ]
+                    ]
+                ),
             )
             await message.answer(
                 "✅ Cообщение отправлено!",
                 reply_markup=ReplyKeyboardRemove(),
             )
             await message.answer(
-                "<i>Хотите отправить еще одно сообщение?</i>",
+                "<i>Хотите отправить еще одно сообщение этому пользователю?</i>",
                 reply_markup=InlineKeyboardMarkup(
                     inline_keyboard=[
                         [
                             InlineKeyboardButton(
                                 text="🔄 Отправить ещё",
-                                url=f"t.me/anonymous_post_bot?start={id}",
+                                callback_data=f"answer_{id}",
                             )
                         ]
                     ]
