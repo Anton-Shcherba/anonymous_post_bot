@@ -1,11 +1,6 @@
 import config
 import asyncio
-import logging
-import sys
-from os import getenv
-from typing import Any, Dict
-
-from aiogram import Bot, Dispatcher, F, Router, html, exceptions
+from aiogram import Bot, Dispatcher, F, Router, exceptions
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram.fsm.context import FSMContext
@@ -19,8 +14,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     CallbackQuery,
 )
-import re
-import hashlib
+
 
 form_router = Router()
 
@@ -35,36 +29,60 @@ class Form(StatesGroup):
 # обработка собщений при нулевом состоянии
 
 
+async def handle_exceptions(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer(
+        "⛔️ Извини, пользователь не найден",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+
+async def start_anonymous_msg_workflow(
+    to_whom_id: str, message: Message, state: FSMContext
+) -> None:
+    await state.set_state(Form.id)
+    await state.update_data(id=to_whom_id)
+    await message.answer(
+        f"💬 Отправь своё анонимное послание",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="♻️ Отмена")]],
+            input_field_placeholder="Введите текст...",
+            resize_keyboard=True,
+        ),
+    )
+
+
+def create_anon_msg_markup(btn_text: str, to_whom_id: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=btn_text,
+                    callback_data=f"answer_{to_whom_id}",
+                )
+            ]
+        ]
+    )
+
+
 @form_router.callback_query()
 async def callback_query_handler(
     callback_query: CallbackQuery, state: FSMContext
-) -> Any:
-    if callback_query.data:
-        data_list = callback_query.data.split("_")
-        if len(data_list) == 2 and data_list[0] == "answer":
-            try:
-                await callback_query.bot.get_chat(data_list[1])
-                await state.set_state(Form.id)
-                await state.update_data(id=data_list[1])
-                await callback_query.message.answer(
-                    f"💬 Отправь своё анонимное послание",
-                    reply_markup=ReplyKeyboardMarkup(
-                        keyboard=[[KeyboardButton(text="⛔️ Отмена")]],
-                        input_field_placeholder="Введите текст...",
-                        resize_keyboard=True,
-                    ),
-                )
-                await callback_query.answer()
-            except exceptions.TelegramBadRequest:
-                await state.clear()
-                await callback_query.message.answer(
-                    "⛔️ Извини, пользователь не найден",
-                    reply_markup=ReplyKeyboardRemove(),
-                )
+) -> None:
+    if callback_query.data and callback_query.data.startswith("answer_"):
+        try:
+            to_whom_id = callback_query.data[7:]
+            await callback_query.answer()
+            await callback_query.bot.get_chat(to_whom_id)
+            await start_anonymous_msg_workflow(
+                to_whom_id, callback_query.message, state
+            )
+        except exceptions.TelegramBadRequest:
+            await handle_exceptions(callback_query.message, state)
 
 
 @form_router.message(CommandStart())
-async def command_start(
+async def command_start_handler(
     message: Message, state: FSMContext, command: CommandObject
 ) -> None:
     if not command.args:
@@ -82,55 +100,34 @@ async def command_start(
     else:
         try:
             await message.bot.get_chat(command.args)
-            await state.set_state(Form.id)
-            await state.update_data(id=command.args)
-            await message.answer(
-                f"💬 Отправь своё анонимное послание",
-                reply_markup=ReplyKeyboardMarkup(
-                    keyboard=[[KeyboardButton(text="⛔️ Отмена")]],
-                    input_field_placeholder="Введите текст...",
-                    resize_keyboard=True,
-                ),
-            )
+            await start_anonymous_msg_workflow(command.args, message, state)
         except exceptions.TelegramBadRequest:
-            await state.clear()
-            await message.answer(
-                "⛔️ Извини, пользователь не найден", reply_markup=ReplyKeyboardRemove()
-            )
+            await handle_exceptions(message, state)
 
 
 @form_router.message(Command("cancel"))
-@form_router.message(F.text == "⛔️ Отмена")
+@form_router.message(F.text == "♻️ Отмена")
 async def cancel_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
-        "⛔️ Отмена отправки",
+        "♻️ Отмена отправки",
         reply_markup=ReplyKeyboardRemove(),
     )
 
 
 @form_router.message(Form.id)
-async def process_id(message: Message, state: FSMContext) -> None:
+async def process_state_id(message: Message, state: FSMContext) -> None:
     current_state = await state.get_data()
-    id = current_state.get("id")
+    to_whom_id: str | None = current_state.get("id")
     await state.clear()
-    if not id:
+    if not to_whom_id:
         await message.answer("⛔️ Ошибка", reply_markup=ReplyKeyboardRemove())
     else:
         try:
             await message.bot.send_message(
-                id,
+                to_whom_id,
                 f"📨 <b>Получено новое сообщение</b>\n\n{message.text}",
-                reply_markup=InlineKeyboardMarkup(
-                    inline_keyboard=[
-                        [
-                            InlineKeyboardButton(
-                                text="🔄 Ответить",
-                                callback_data=f"answer_{message.from_user.id}",
-                            )
-                        ]
-                    ]
-                ),
+                reply_markup=create_anon_msg_markup("🔄 Ответить", message.from_user.id),
             )
             await message.answer(
                 "✅ Cообщение отправлено!",
@@ -138,22 +135,10 @@ async def process_id(message: Message, state: FSMContext) -> None:
             )
             await message.answer(
                 "<i>Хотите отправить еще одно сообщение этому пользователю?</i>",
-                reply_markup=InlineKeyboardMarkup(
-                    inline_keyboard=[
-                        [
-                            InlineKeyboardButton(
-                                text="🔄 Отправить ещё",
-                                callback_data=f"answer_{id}",
-                            )
-                        ]
-                    ]
-                ),
+                reply_markup=create_anon_msg_markup("🔄 Отправить ещё", to_whom_id),
             )
         except exceptions.TelegramBadRequest:
-            await state.clear()
-            await message.answer(
-                "⛔️ Извини, пользователь не найден", reply_markup=ReplyKeyboardRemove()
-            )
+            await handle_exceptions(message, state)
 
 
 async def main():
