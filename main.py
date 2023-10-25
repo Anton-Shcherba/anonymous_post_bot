@@ -29,7 +29,10 @@ class Form(StatesGroup):
     id = State()
 
 
-# TODO: проброс текста в поле ввода, ситуация со стэйтом отправки и получением сообщения
+# TODO
+# ситуация со стэйтом отправки и получением сообщения
+# обработка всех типов сообщений
+# обработка собщений при нулевом состоянии
 
 
 @form_router.callback_query()
@@ -47,6 +50,7 @@ async def callback_query_handler(
                     f"💬 Отправь своё анонимное послание",
                     reply_markup=ReplyKeyboardMarkup(
                         keyboard=[[KeyboardButton(text="⛔️ Отмена")]],
+                        input_field_placeholder="Введите текст...",
                         resize_keyboard=True,
                     ),
                 )
@@ -83,7 +87,9 @@ async def command_start(
             await message.answer(
                 f"💬 Отправь своё анонимное послание",
                 reply_markup=ReplyKeyboardMarkup(
-                    keyboard=[[KeyboardButton(text="⛔️ Отмена")]], resize_keyboard=True
+                    keyboard=[[KeyboardButton(text="⛔️ Отмена")]],
+                    input_field_placeholder="Введите текст...",
+                    resize_keyboard=True,
                 ),
             )
         except exceptions.TelegramBadRequest:
