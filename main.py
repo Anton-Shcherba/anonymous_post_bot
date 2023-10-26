@@ -1,7 +1,7 @@
 import config
 import asyncio
 from aiogram import Bot, Dispatcher, F, Router, exceptions
-from aiogram.enums import ParseMode
+from aiogram.enums import ParseMode, ContentType
 from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -25,8 +25,7 @@ class Form(StatesGroup):
 
 # TODO
 # ситуация со стэйтом отправки и получением сообщения
-# обработка всех типов сообщений
-# обработка собщений при нулевом состоянии
+# обработка всех типов сообщений при анонимном послании
 
 
 async def handle_exceptions(message: Message, state: FSMContext) -> None:
@@ -65,6 +64,14 @@ def create_anon_msg_markup(btn_text: str, to_whom_id: str) -> InlineKeyboardMark
     )
 
 
+async def send_link(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer(
+        f"🔗 Вот твоя личная ссылка, опубликуй её и получай анонимные сообщения\n\n<code>t.me/anonymous_post_bot?start={message.from_user.id}</code>",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+
 @form_router.callback_query()
 async def callback_query_handler(
     callback_query: CallbackQuery, state: FSMContext
@@ -86,11 +93,7 @@ async def command_start_handler(
     message: Message, state: FSMContext, command: CommandObject
 ) -> None:
     if not command.args:
-        await state.clear()
-        await message.answer(
-            f"🔗 Вот твоя личная ссылка, опубликуй её и получай анонимные сообщения\n\n<code>t.me/anonymous_post_bot?start={message.from_user.id}</code>",
-            reply_markup=ReplyKeyboardRemove(),
-        )
+        await send_link(message, state)
     elif command.args == str(message.from_user.id):
         await state.clear()
         await message.answer(
@@ -139,6 +142,11 @@ async def process_state_id(message: Message, state: FSMContext) -> None:
             )
         except exceptions.TelegramBadRequest:
             await handle_exceptions(message, state)
+
+
+@form_router.message()
+async def other_msg_handler(message: Message, state: FSMContext) -> None:
+    await send_link(message, state)
 
 
 async def main():
