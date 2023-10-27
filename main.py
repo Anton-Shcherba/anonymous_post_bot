@@ -23,11 +23,6 @@ class Form(StatesGroup):
     id = State()
 
 
-# TODO
-# ситуация со стэйтом отправки и получением сообщения
-# обработка всех типов сообщений при анонимном послании
-
-
 async def handle_exceptions(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
@@ -42,7 +37,7 @@ async def start_anonymous_msg_workflow(
     await state.set_state(Form.id)
     await state.update_data(id=to_whom_id)
     await message.answer(
-        f"💬 Отправь своё анонимное послание",
+        f"💬 Ты можешь отправить любое сообщение: <i>текст, голосовое сообщение, фото и т.п.</i>",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="♻️ Отмена")]],
             input_field_placeholder="Введите текст...",
@@ -127,9 +122,8 @@ async def process_state_id(message: Message, state: FSMContext) -> None:
         await message.answer("⛔️ Ошибка", reply_markup=ReplyKeyboardRemove())
     else:
         try:
-            await message.bot.send_message(
+            await message.copy_to(
                 to_whom_id,
-                f"📨 <b>Получено новое сообщение</b>\n\n{message.text}",
                 reply_markup=create_anon_msg_markup("🔄 Ответить", message.from_user.id),
             )
             await message.answer(
