@@ -122,6 +122,9 @@ async def process_state_id(message: Message, state: FSMContext) -> None:
         await message.answer("⛔️ Ошибка", reply_markup=ReplyKeyboardRemove())
     else:
         try:
+            await message.bot.send_message(
+                to_whom_id, "📨 <b>Получено новое сообщение</b>"
+            )
             await message.copy_to(
                 to_whom_id,
                 reply_markup=create_anon_msg_markup("🔄 Ответить", message.from_user.id),
