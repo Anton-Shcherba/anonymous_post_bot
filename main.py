@@ -37,7 +37,7 @@ async def start_anonymous_msg_workflow(
     await state.set_state(Form.id)
     await state.update_data(id=to_whom_id)
     await message.answer(
-        f"💬 Ты можешь отправить любое сообщение: <i>текст, голосовое сообщение, фото и т.п.</i>",
+        f"💬 Отправь своё анонимное послание\n(<i>текст, голосовое, фото, видео или др.</i>)",
         reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="♻️ Отмена")]],
             input_field_placeholder="Введите текст...",
