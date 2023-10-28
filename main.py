@@ -23,6 +23,27 @@ class Form(StatesGroup):
     id = State()
 
 
+def create_anon_msg_markup(btn_text: str, to_whom_id: str) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text=btn_text,
+                    callback_data=f"answer_{to_whom_id}",
+                )
+            ]
+        ]
+    )
+
+
+def create_сancel_markup() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="♻️ Отмена")]],
+        input_field_placeholder="Введите текст...",
+        resize_keyboard=True,
+    )
+
+
 async def handle_exceptions(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
@@ -38,24 +59,7 @@ async def start_anonymous_msg_workflow(
     await state.update_data(id=to_whom_id)
     await message.answer(
         f"💬 Отправь своё анонимное послание\n(<i>текст, голосовое, фото, видео или др.</i>)",
-        reply_markup=ReplyKeyboardMarkup(
-            keyboard=[[KeyboardButton(text="♻️ Отмена")]],
-            input_field_placeholder="Введите текст...",
-            resize_keyboard=True,
-        ),
-    )
-
-
-def create_anon_msg_markup(btn_text: str, to_whom_id: str) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text=btn_text,
-                    callback_data=f"answer_{to_whom_id}",
-                )
-            ]
-        ]
+        reply_markup=create_сancel_markup(),
     )
 
 
@@ -113,6 +117,16 @@ async def cancel_handler(message: Message, state: FSMContext) -> None:
     )
 
 
+@form_router.message(Command("support"))
+async def start_support_msg_workflow(message: Message, state: FSMContext) -> None:
+    await state.set_state(Form.id)
+    await state.update_data(id="support")
+    await message.answer(
+        f"⚠️ Cледующее сообщение будет отправлено в чат технической пооддержки",
+        reply_markup=create_сancel_markup(),
+    )
+
+
 @form_router.message(Form.id)
 async def process_state_id(message: Message, state: FSMContext) -> None:
     current_state = await state.get_data()
@@ -121,22 +135,32 @@ async def process_state_id(message: Message, state: FSMContext) -> None:
     if not to_whom_id:
         await message.answer("⛔️ Ошибка", reply_markup=ReplyKeyboardRemove())
     else:
+        is_support = to_whom_id == "support"
+        to_whom_id = config.ADMIN_ID if is_support else to_whom_id
+        is_admin = to_whom_id == config.ADMIN_ID
         try:
             await message.bot.send_message(
-                to_whom_id, "📨 <b>Получено новое сообщение</b>"
+                to_whom_id,
+                f"📨 <b>Получено новое сообщение{' для технической пооддержки' if is_support else ''}</b>"
+                + f"\n\n<b>имя</b>: {message.from_user.mention_html()}\n<b>юзернэйм</b>: @{message.from_user.username}\n<b>id</b>: {message.from_user.id}"
+                if is_admin
+                else "",
             )
             await message.copy_to(
                 to_whom_id,
-                reply_markup=create_anon_msg_markup("🔄 Ответить", message.from_user.id),
+                reply_markup=create_anon_msg_markup(
+                    f"{'⚠️' if is_support else '🔄'} Ответить", message.from_user.id
+                ),
             )
             await message.answer(
-                "✅ Cообщение отправлено!",
+                f"✅ Cообщение отправлено{' в чат технической пооддержки' if is_support else ''}!",
                 reply_markup=ReplyKeyboardRemove(),
             )
-            await message.answer(
-                "<i>Хотите отправить еще одно сообщение этому пользователю?</i>",
-                reply_markup=create_anon_msg_markup("🔄 Отправить ещё", to_whom_id),
-            )
+            if not is_support:
+                await message.answer(
+                    "<i>Хотите отправить еще одно сообщение этому пользователю?</i>",
+                    reply_markup=create_anon_msg_markup("🔄 Отправить ещё", to_whom_id),
+                )
         except exceptions.TelegramBadRequest:
             await handle_exceptions(message, state)
 
