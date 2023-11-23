@@ -123,8 +123,8 @@ async def state_parse(state: FSMContext) -> tuple[str, bool, bool, bool]:
     data = await state.get_data()
     match current_state:
         case Form.user_to_user:
-            for_admin = id == config.ADMIN_ID
-            return (data.get(Form.user_to_user._state), for_admin, False, False)
+            id = data.get(Form.user_to_user._state)
+            return (id, id == config.ADMIN_ID, False, False)
         case Form.user_to_support:
             return (config.ADMIN_ID, True, True, False)
         case Form.support_to_user:
