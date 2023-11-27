@@ -17,7 +17,8 @@ router = Router()
 
 async def send_link(message: Message, state: FSMContext) -> None:
     await state.clear()
-    start_link_msg = text.start_msg_tmpl.format(id=message.from_user.id)
+    bot_name = (await message.bot.get_me()).username
+    start_link_msg = text.start_msg_tmpl.format(id=message.from_user.id, bot=bot_name)
     await message.answer(start_link_msg, reply_markup=ReplyKeyboardRemove())
 
 
