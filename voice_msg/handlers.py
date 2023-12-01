@@ -23,6 +23,12 @@ results_list = [
 
 @router.inline_query()
 async def inline_query_handler(query: InlineQuery):
+    offset = int(query.offset) if query.offset else 0
     search_query = query.query.replace("ё", "е").lower()
-    results = [x for x in results_list if search_query in x.title]
-    await query.answer(results)
+    results = [x for x in results_list if search_query in x.title][offset : offset + 50]
+    print(offset)
+    if len(results) < 50:
+        await query.answer(results, is_personal=True)
+    else:
+        await query.answer(results, is_personal=True, next_offset=str(offset + 50))
+    # await query.answer(results)
