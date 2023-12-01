@@ -1,4 +1,10 @@
-voice_dict: dict[str, str] = {
+voice_dict: dict = {
+    "AwACAgIAAxkBAAIB3mVqBxkUjzhcAbTKfIZeDAN3iPMfAAJKOgACEthRS2K1ZmsBQy6uMwQ": "💂‍♂️ Это лучшая работа в мире, лучшая работав мире, лучшая работав мире",
+    "AwACAgIAAxkBAAIB22VqBaqr5esAATp4bpjEdRwKMOEAAd4AAiE6AAIS2FFLzzt980WKTn8zBA": "👂 слушай блядь, ты, какой это год, ты в контакте вычитал эту хуйню, закрой ебало",
+    "AwACAgIAAxkBAAIB2GVqAn-oLfHSr6hC1qkLK7-Jno-qAAL3OQACEthRS5mw1rhaKDOMMwQ": "🤡 очень смешно, больше не отправляй мне эту хуйню, понял, спасибо",
+    "AwACAgIAAxkBAAIBvWVo5HG_33CUlZa4VgS9LywYre3lAAKgQQACEthJSwY_PskvmB5kMwQ": "🧢 я бы в конституции написал, гражанам ахуевать нельзя, ахуели вам пизда",
+    "AwACAgIAAxkBAAIBwWVo5XGoRnuBMmfbB5VakgPs7rqbAAKnQQACEthJSxTi9EebK-1nMwQ": "🦷 я тебе сейчас прилюдно дам пизды",
+    "AwACAgIAAxkBAAIByWVo5tsXLKy4IMVsMJKwUCyFur8_AALIQQACEthJSxTpIP1lLwlVMwQ": "🤐 завали ебало своё, не перебивай меня",
     "AwACAgIAAxkBAAPyZWhwWIcbnRH_mzGMcOrjsJcwznAAAlI8AALe1kFLZIakUwrz07kzBA": "🍯 м, сука ну мед, мед блядь, ну медятина, мед",
     "AwACAgIAAxkBAAP2ZWh14EAqw7pB22Xi7wWA5a3VLE8AAlM9AALMIUBLyGwEWa-ikPkzBA": "🌩️ ха-ха, конечно, конечно, конечно",
     "AwACAgIAAxkBAAP6ZWh5m0lKejwrl-mxS5sdOJem018AAqk9AALMIUBLRda--w1ZHjYzBA": "👵 ну и что, перед каждым отчитываться я буду, перед вами блядями",
@@ -47,4 +53,6 @@ voice_dict: dict[str, str] = {
     "AwACAgIAAxkBAAIBqGVonFOLLn7TVbRwCxalt1fYgZu7AAJ0PwACzCFAS0hZT6Bps-2IMwQ": "😘 не расстраивайся",
     "AwACAgIAAxkBAAPvZWhbSvro4o11fJu-9gzP78KkWTMAAoU7AALe1kFL-6hYymGxPdEzBA": "🏁 я сказала стартуем",
     "AwACAgIAAxkBAAIBrmVonIGTUYcHTI_uMJXLOZBuD55DAAJ4PwACzCFASzpDmIOjOA6UMwQ": "🔎 чтооо",
+    "AwACAgIAAxkBAAIB02VpvxEP7SKNPQQJE3RmfqNoY-tdAAKzNgACEthRS_c4CwHWGFIAATME": "🥔 зачем вы меня сюда привезли",
+    "AwACAgIAAxkBAAIB1WVpvyPo7nv1jrx3lt-JcOapZ2E2AAK0NgACEthRS6_YMxxGpXcaMwQ": "💋 я шлюха",
 }
