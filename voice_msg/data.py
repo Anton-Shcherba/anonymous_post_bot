@@ -1,4 +1,7 @@
 voice_dict: dict = {
+    "AwACAgIAAxkBAAIB62VqP8dgx-xiXY6cwtJ9EzMJSaPxAALcPAACEthRS7PxurfwzRMaMwQ": "🏡 это шо такое, это шо такое сука",
+    "AwACAgIAAxkBAAIB6WVqP8J69v6LlCyMI3sTCmN3W50hAALbPAACEthRS1aEYa6GZPl0MwQ": "🍩 жуть какая и долго это будет",
+    "AwACAgIAAxkBAAIB52VqP7nw71Xsc043kHnpZeHULy0kAALaPAACEthRS8mfED1QVjp1MwQ": "🧨 блин, а хули блин, бля",
     "AwACAgIAAxkBAAIB3mVqBxkUjzhcAbTKfIZeDAN3iPMfAAJKOgACEthRS2K1ZmsBQy6uMwQ": "💂‍♂️ Это лучшая работа в мире, лучшая работав мире, лучшая работав мире",
     "AwACAgIAAxkBAAIB22VqBaqr5esAATp4bpjEdRwKMOEAAd4AAiE6AAIS2FFLzzt980WKTn8zBA": "👂 слушай блядь, ты, какой это год, ты в контакте вычитал эту хуйню, закрой ебало",
     "AwACAgIAAxkBAAIB2GVqAn-oLfHSr6hC1qkLK7-Jno-qAAL3OQACEthRS5mw1rhaKDOMMwQ": "🤡 очень смешно, больше не отправляй мне эту хуйню, понял, спасибо",
