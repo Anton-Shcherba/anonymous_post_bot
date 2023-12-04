@@ -68,4 +68,7 @@ voice_dict: dict = {
     "AwACAgIAAxkBAAIBrmVonIGTUYcHTI_uMJXLOZBuD55DAAJ4PwACzCFASzpDmIOjOA6UMwQ": "🔎 чтооо",
     "AwACAgIAAxkBAAIB02VpvxEP7SKNPQQJE3RmfqNoY-tdAAKzNgACEthRS_c4CwHWGFIAATME": "🥔 зачем вы меня сюда привезли",
     "AwACAgIAAxkBAAIB1WVpvyPo7nv1jrx3lt-JcOapZ2E2AAK0NgACEthRS6_YMxxGpXcaMwQ": "💋 я шлюха",
+    "AwACAgIAAxkBAAICEmVtxAImvY8Z5GNUW74_5il0dAjVAAKbPAACMiBoSwL3u8f8LIJqMwQ": "🚂 я выебу вас так как вас не ебали ни разу в жизни, вам будет казаться что вас ебет поезд, чух-чух",
+    "AwACAgIAAxkBAAICEGVtw-N_oOijS8Dztl53DiL1sJSoAAKaPAACMiBoSzsfOjqJ_fanMwQ": "🌵 вот гандон, а всё, вижу",
+    "AwACAgIAAxkBAAICDmVtw51petaomlqpGTZHfAgVXTWGAAKUPAACMiBoS3K_4CI33Un4MwQ": "🥖 я хороший, я хороший, я такой хороший - на самом деле я гандон",
 }
